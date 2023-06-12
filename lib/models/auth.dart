@@ -1,3 +1,5 @@
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +13,8 @@ class Authentication {
   static Future<User?> signInWithGoogle({required BuildContext context}) async {
     FirebaseAuth auth = await FirebaseAuth.instance;
     User? user;
+    
+
 
     if (kIsWeb) {
       GoogleAuthProvider authProvider = GoogleAuthProvider();
@@ -20,6 +24,22 @@ class Authentication {
             await auth.signInWithPopup(authProvider);
 
         user = userCredential.user;
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+           await prefs.setString("uid", user!.uid.toString());
+          await prefs.setString("name", user.displayName.toString());
+          await prefs.setString("email", user.email.toString());
+          await prefs.setString("img", user.photoURL.toString());
+          await prefs.setBool('islogged', true);
+
+          FirebaseFirestore _db= await FirebaseFirestore.instance;
+        _db.collection("users").doc(user.uid.toString())
+        .set({
+           'uid':user.uid.toString(),
+          'name':user.displayName.toString() ,
+          'email':user.email.toString(),
+          'img':user.photoURL.toString()
+        });
+  
       } catch (e) {
         print(e);
       }
@@ -44,11 +64,21 @@ class Authentication {
 
           user = userCredential.user;
           final SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString("uid", auth.currentUser!.uid.toString());
-          await prefs.setString("name", auth.currentUser!.displayName.toString());
-          await prefs.setString("email", auth.currentUser!.email.toString());
-          await prefs.setString("img", auth.currentUser!.photoURL.toString());
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
+           await prefs.setString("uid", user!.uid.toString());
+          await prefs.setString("name", user.displayName.toString());
+          await prefs.setString("email", user.email.toString());
+          await prefs.setString("img", user.photoURL.toString());
+          await prefs.setBool('islogged', true);
+
+        FirebaseFirestore _db= await FirebaseFirestore.instance;
+        _db.collection("users").doc(user.uid.toString())
+        .set({
+           'uid':user.uid.toString(),
+          'name':user.displayName.toString(),
+          'email':user.email.toString(),
+          'img':user.photoURL.toString()
+        });
+
 
         } on FirebaseAuthException catch (e) {
           if (e.code == 'account-exists-with-different-credential') {

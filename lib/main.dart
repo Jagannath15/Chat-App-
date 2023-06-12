@@ -1,8 +1,11 @@
 
+import 'package:chat_app/Screens/home.dart';
 import 'package:chat_app/Screens/signin.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -15,11 +18,30 @@ void main() async {
   FlutterNativeSplash.remove();
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  // This widget is the root of your application.
+
+  @override
+   bool _isloged=false;
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getinfo();
+  }
+
+    getinfo() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isloged=  prefs.getBool('islogged')??false;
+    });
+  }
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
@@ -28,7 +50,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         
       ),
-      home: const SigninPage(),
+      home: _isloged==false?SigninPage():HomePage()
     );
   }
 }

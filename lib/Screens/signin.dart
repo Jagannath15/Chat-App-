@@ -1,5 +1,6 @@
 import 'package:chat_app/Screens/home.dart';
 import 'package:chat_app/models/auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +9,7 @@ class SigninPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+  
     var md=MediaQuery.of(context).size;
     return Scaffold(
       body: SingleChildScrollView(
@@ -37,9 +39,12 @@ class SigninPage extends StatelessWidget {
       ),
       bottomNavigationBar: GestureDetector(
       
-        onTap: (){
-          Authentication.signInWithGoogle(context: context);
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
+        onTap: () async{
+         await Authentication.signInWithGoogle(context: context);
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage(),));
+
+
+         
         },
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: 15,vertical: 30),
