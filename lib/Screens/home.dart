@@ -1,8 +1,10 @@
 
 import 'package:chat_app/Screens/message.dart';
 import 'package:chat_app/Screens/search.dart';
+import 'package:chat_app/Screens/signin.dart';
 import 'package:chat_app/models/database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -37,7 +39,7 @@ class _HomePageState extends State<HomePage>  {
       img=  prefs.getString('img');
     });
     
-    data =getfrnds(uid.toString());
+   
   }
 
   Widget build(BuildContext context) {
@@ -46,7 +48,9 @@ class _HomePageState extends State<HomePage>  {
     return Scaffold(
 
       appBar: AppBar(
-        
+        flexibleSpace: Container(decoration: BoxDecoration(
+       
+          gradient: LinearGradient(colors: [Color(0xff21b7f3),Color(0xff35bc90)]),),),
         leading: Builder(
           builder: (context) {
            return GestureDetector(
@@ -61,7 +65,7 @@ class _HomePageState extends State<HomePage>  {
           },
         ),
 
-        title: Center(child: Text("Chats")),
+        title: Center(child: Text("Chats",style: TextStyle(color: Colors.white,fontSize: 24,fontWeight: FontWeight.w500),)),
         actions: [IconButton(onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context) => SearchPage(),)), icon: Icon(Icons.search))],
       ),
 
@@ -93,17 +97,28 @@ class _HomePageState extends State<HomePage>  {
                   title: Text("Update account info"),
                 ),
 
-                ListTile(
-                  leading: Icon(Icons.arrow_back),
-                  title: Text("Sign out"),
+                InkWell(
+                  onTap: () async{
+                    final SharedPreferences prefs = await SharedPreferences.getInstance();
+                    await FirebaseAuth.instance.signOut();
+                    await prefs.remove('uid');
+                    await prefs.remove('name');
+                    await prefs.remove('email');
+                    await prefs.remove('img');
+                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>SigninPage()), (route) => false);
+                    
+                  },
+                  child: ListTile(
+                    leading: Icon(Icons.arrow_back),
+                    title: Text("Sign out"),
+                  ),
                 )
               ],
             )
           ],
         ),
       ),
-      body: SizedBox(
-        
+      body: Container(
         child:StreamBuilder(
           stream: FirebaseFirestore.instance.collection('users').where('uid',isNotEqualTo: uid).snapshots(),
           builder: ( BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){             
@@ -118,7 +133,7 @@ class _HomePageState extends State<HomePage>  {
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
                     final docs= snapshot.data!.docs[index];
-                    return GestureDetector(
+                    return InkWell(
                       onTap: (){
                         Navigator.push(context, MaterialPageRoute(builder: (context)=>MessagePage(
                           email: docs['email'].toString(),
@@ -140,7 +155,7 @@ class _HomePageState extends State<HomePage>  {
                   
                   );
               }
-              return CircularProgressIndicator();
+              return Center(child: CircularProgressIndicator());
           }
         ) ,)
 

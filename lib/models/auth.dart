@@ -32,14 +32,14 @@ class Authentication {
           await prefs.setBool('islogged', true);
 
           FirebaseFirestore _db= await FirebaseFirestore.instance;
-        _db.collection("users").doc(user.uid.toString())
+       await  _db.collection("users").doc(user.uid.toString())
         .set({
            'uid':user.uid.toString(),
           'name':user.displayName.toString() ,
           'email':user.email.toString(),
           'img':user.photoURL.toString()
         });
-  
+      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>HomePage()), (route) => false);
       } catch (e) {
         print(e);
       }
@@ -78,7 +78,7 @@ class Authentication {
           'email':user.email.toString(),
           'img':user.photoURL.toString()
         });
-
+        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>HomePage()), (route) => false);
 
         } on FirebaseAuthException catch (e) {
           if (e.code == 'account-exists-with-different-credential') {

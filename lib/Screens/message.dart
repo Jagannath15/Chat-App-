@@ -1,10 +1,19 @@
 
 
-import 'package:chat_app/models/database.dart';
+import 'package:chat_app/widget/imgbubble.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
+import 'package:chat_app/Screens/home.dart';
+import 'package:chat_app/models/database.dart';
+import 'package:chat_app/widget/chatbubble.dart';
+import 'dart:io';
 
-class MessagePage extends StatelessWidget {
+
+class MessagePage extends StatefulWidget {
   String sendruid;
   String recuid;
   String name;
@@ -20,101 +29,185 @@ class MessagePage extends StatelessWidget {
   });
 
   @override
+  State<MessagePage> createState() => _MessagePageState();
+}
+
+class _MessagePageState extends State<MessagePage> {
+  @override
+  String grpid='';
+
+  generategrpid(){
+    if(widget.sendruid.compareTo(widget.recuid)>0){
+      grpid='${widget.sendruid}-${widget.recuid}';
+    }
+    else{
+      grpid='${widget.recuid}-${widget.sendruid}';
+    }
+}
+
+
+
+
+
+@override
+  void initState() {
+    // TODO: implement initState
+    generategrpid();
+    super.initState();
+  }
+
+File? imgfile;
+Future getimage() async{
+    
+    ImagePicker _picker=ImagePicker();
+     await _picker.pickImage(source: ImageSource.gallery).then((xFile) {
+      if (XFile!=null) {
+        imgfile=File(xFile!.path);
+         uploadimg().onError((error, stackTrace) => print(error));
+      }
+
+      if(kIsWeb){
+            return SnackBar(content: Text("Not available for web "));
+      }
+
+    }).onError((error, stackTrace) {print(error.toString());});
+}
+
+Future uploadimg() async{
+  String filename= Uuid().v1();
+  var ref=FirebaseStorage.instance.ref().child('images').child('$filename.jpg');
+  
+  var uploadtask= await ref.putFile(imgfile!);
+
+  String imgurl= await  uploadtask.ref.getDownloadURL();
+  sendimg(widget.sendruid, widget.recuid,'', widget.email, grpid.toString(), imgurl.toString());
+  print(imgurl.toString());
+}
+
+
   Widget build(BuildContext context) {
-    var doc=FirebaseFirestore.instance.collection("messages").doc(sendruid).collection('message').where('email',isEqualTo: email).snapshots();
+    
     TextEditingController _msg=TextEditingController();
     return  Scaffold(
 
       appBar: AppBar(
-        leadingWidth: double.minPositive,
-        leading: Container(         
-          child: Row(
+      flexibleSpace: Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [Color(0xff21b7f3),Color(0xff35bc90)]),),),
+      leadingWidth: double.maxFinite,
+        leading:         
+           Row(
             children: [
-              IconButton(onPressed: (){}, icon: Icon(Icons.arrow_back)),
-              SizedBox(width: 3,),
-             CircleAvatar(foregroundImage: NetworkImage(img.toString()),),
+              IconButton(onPressed: (){
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>HomePage()), (route) => false);
+              }, icon: Icon(Icons.arrow_back,color: Colors.white,)),
+          
+             CircleAvatar(foregroundImage: NetworkImage(widget.img.toString()),),
               SizedBox(width: 7,),
-             Text(name.toString())
+             Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 Text(widget.name.toString(),style: TextStyle(fontSize: 18,color: Colors.white),),
+                 Text(widget.email.toString(),style: TextStyle(fontSize: 12,color: Colors.grey[50]),),
+               ],
+             )
+             
             ],
-          ),
+          
         ),
 
          
       ),
 
 
-
-      body: Container(
-        margin: EdgeInsets.only(bottom: 10),
-        child: Column(
+      body: Column(
           children: [
-            Expanded(child:Container(
-              child: StreamBuilder 
-              (
-                stream: doc,
-                builder: (context,AsyncSnapshot<QuerySnapshot> snapshot) {
-
-                  if(snapshot.hasData){
-                    ListView.builder(
+            Expanded(
+              child: StreamBuilder (
+                stream: FirebaseFirestore.instance.collection('messages').doc(grpid.toString()).collection('message').orderBy('timestamp',descending: true).snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {    
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }                
+                
+                
+                return ListView.builder(
+                  reverse: true,
+                 shrinkWrap: true ,
                     itemCount: snapshot.data!.docs.length,
-                    itemBuilder: (context, index) {
+                    itemBuilder: (context, index) { 
                       var docs=snapshot.data!.docs[index];
-                      print(docs['message']);
-                      return ListTile(title: Text(docs['message'].toString()),);
-                    },);
-
-                  }
-                  
-                  return CircularProgressIndicator();
-                } ,
-            
-                ),
-            ) 
-
-            
-            ),
-
-
-
-
-
-             Row(
-              children: [
-                SizedBox(width: 5,),
-                Expanded(
-                  child: Material(
-                    elevation: 40,
-                    borderRadius: BorderRadius.circular(25),
-                    child: Container(    
-                      padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5), 
-                      child: TextField(
-                        controller: _msg,
-                        style: TextStyle(fontSize: 20),
-                         cursorColor: Color.fromARGB(255, 65, 118, 197) ,
-                         decoration: InputDecoration(
-                          hintText: "Type message here",
-                          hintStyle: TextStyle(fontSize: 20),
-                          focusColor:  Color.fromARGB(255, 65, 118, 197),
-                         border: InputBorder.none
-                         ),
-                      ),
                       
+                      return docs['type'].toString()=='text'? 
+                      ChatBubble(text: docs['message'].toString(), isCurrentUser: docs['sender'].toString()==widget.sendruid.toString() ? true:false, time: docs['time'].toString(), ):
+                      ImgBubble(img: docs['imgurl'], isCurrentUser:docs['sender'].toString()==widget.sendruid.toString() ? true:false, time: docs['time'].toString() );
+                      
+                   //return ChatBubble(text: docs['message'].toString(), isCurrentUser: docs['sender'].toString()==widget.sendruid.toString() ? true:false );
+                    },
+                   );
+                  } ,
+                ),
+               ), 
+
+            
+
+             Container(
+              margin: EdgeInsets.only(bottom: 5),
+               child: Row(
+                children: [
+                  
+                  Expanded(
+                    child: Material(
+                      
+                      elevation: 40,
+                      borderRadius: BorderRadius.circular(25),
+                      child: Container(    
+                      
+                        padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5), 
+                        child: TextField(
+                          controller: _msg,
+                          style: TextStyle(fontSize: 16),
+                           cursorColor: Color.fromARGB(255, 65, 118, 197) ,
+                           decoration: InputDecoration(
+                            hintText: "Type message here",
+                            //image upload part
+                            prefixIcon: IconButton(onPressed:  () {
+             
+                             getimage();
+             
+                            }, icon:Icon(Icons.camera_alt)),
+                            hintStyle: TextStyle(fontSize: 20),
+                            focusColor:  Color.fromARGB(255, 65, 118, 197),
+                           border: InputBorder.none
+                           ),
+                        ),
+                        
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(width: 5,),
-                IconButton(
-                      onPressed: () async{
-                    await  sendmessage(sendruid, recuid, _msg.text,email.toString() );
-                    _msg.clear();
-                      },
-                      icon: Icon(Icons.send,color:  Color.fromARGB(255, 65, 118, 197),)),
-              ],
-            ),
+                  SizedBox(width: 5,),
+                  IconButton(
+                        onPressed: () async{
+                            if(_msg.text.isEmpty || _msg==""){
+             
+                            }
+             
+                            if(_msg.text.isNotEmpty){
+                               await  sendmessage(widget.sendruid, widget.recuid, _msg.text,widget.email.toString() ,grpid.toString());
+                                _msg.clear();
+                            }
+                          
+                     
+                        },
+                        icon: Icon(Icons.send,color: Color(0xff35bc90))),
+                ],
+                         ),
+             ),
 
           ],
         ),
-      )
+      
       
     );
   }

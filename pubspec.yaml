@@ -41,6 +41,10 @@ dependencies:
   firebase_auth: ^4.6.2
   shared_preferences: ^2.1.2
   cloud_firestore: ^4.8.0
+  firebase_storage: ^11.2.2
+  image_picker: ^0.8.8
+  uuid: ^3.0.7
+  chat_bubbles: ^1.4.1
  
 
 dev_dependencies:

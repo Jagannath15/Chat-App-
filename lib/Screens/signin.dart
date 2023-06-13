@@ -41,7 +41,7 @@ class SigninPage extends StatelessWidget {
       
         onTap: () async{
          await Authentication.signInWithGoogle(context: context);
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage(),));
+       //   Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage(),));
 
 
          
