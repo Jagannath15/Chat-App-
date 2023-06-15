@@ -55,6 +55,24 @@ sendimg(String senderuid,String reciverid,String msg,String email,String grpid,S
 }
 
 
+sendvideo(String senderuid,String reciverid,String msg,String email,String grpid,String videourl){
+  String time=DateTime.now().hour.toString()+':'+DateTime.now().minute.toString();
+   _db.collection('messages').doc(grpid.toString()).collection('message').doc().set(
+    {
+      'message':'',
+      'sender':senderuid.toString(),
+       'reciver':reciverid,
+       'type':"video",
+       'email':email.toString(),
+       'imgurl':"",
+       'videourl':videourl.toString(),
+      'timestamp': FieldValue.serverTimestamp(),
+      'time':time.toString()
+
+    }
+   );
+}
+
 
 
 

@@ -28,7 +28,7 @@ class SigninPage extends StatelessWidget {
               height: 100,
               margin: EdgeInsets.symmetric(horizontal: md.width*0.23), 
               child: 
-            Text("Always be there, even when you're far away.",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+            Text("Talk, share, explore with our chat app!",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
             maxLines: 2,
             textAlign: TextAlign.center,
             )
@@ -41,10 +41,7 @@ class SigninPage extends StatelessWidget {
       
         onTap: () async{
          await Authentication.signInWithGoogle(context: context);
-       //   Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage(),));
-
-
-         
+ 
         },
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: 15,vertical: 30),

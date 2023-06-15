@@ -19,6 +19,7 @@ class ImgBubble extends StatelessWidget {
         child: Align(
           alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
           child: Column(
+            crossAxisAlignment: isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
               Container(
                 padding: EdgeInsets.all(5),
