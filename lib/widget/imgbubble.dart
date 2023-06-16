@@ -31,7 +31,10 @@ class ImgBubble extends StatelessWidget {
                   border: Border.all(width: 2.5,color: isCurrentUser ?  Color(0xff35bc90) :Color(0xff21b7f3)),
                 ),
               ),
-              Text(time.toString())
+              Text(time.toString(),style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey.shade700
+            ),)
             ],
           ),
         ),

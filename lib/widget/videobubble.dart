@@ -50,7 +50,10 @@ class _VideobubbleState extends State<Videobubble> {
                   border: Border.all(width: 2.5,color: widget.isCurrentUser ?  Color(0xff35bc90) :Color(0xff21b7f3)),
                 ),
               ),
-              Text(widget.time.toString())
+              Text(widget.time.toString(),style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey.shade700
+            ),)
             ],
           )
     ),

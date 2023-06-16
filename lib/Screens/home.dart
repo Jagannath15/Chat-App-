@@ -2,6 +2,7 @@
 import 'package:chat_app/Screens/message.dart';
 import 'package:chat_app/Screens/search.dart';
 import 'package:chat_app/Screens/signin.dart';
+import 'package:chat_app/Screens/update_account_info.dart';
 import 'package:chat_app/models/database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -92,9 +93,14 @@ class _HomePageState extends State<HomePage>  {
                   title: Text("Home"),
                 ),
                 
-                ListTile(
-                  leading: Icon(Icons.update),
-                  title: Text("Update account info"),
+                InkWell(
+                  onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>AccountInfo(img: img.toString(), name: name.toString(),email: email.toString(),uid: uid.toString(),)));
+                  },
+                  child: ListTile(
+                    leading: Icon(Icons.update),
+                    title: Text("Update account info"),
+                  ),
                 ),
 
                 InkWell(

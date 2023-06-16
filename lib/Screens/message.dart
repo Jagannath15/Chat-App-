@@ -170,123 +170,125 @@ Future uploadvideo() async {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection('messages')
-                  .doc(grpid.toString())
-                  .collection('message')
-                  .orderBy('timestamp', descending: true)
-                  .snapshots(),
-              builder: (context,
-                  AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('messages')
+                    .doc(grpid.toString())
+                    .collection('message')
+                    .orderBy('timestamp', descending: true)
+                    .snapshots(),
+                builder: (context,
+                    AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+      
+                  return ListView.builder(
+                    reverse: true,
+                    shrinkWrap: true,
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      var docs = snapshot.data!.docs[index];
+      
+                      if(docs['type'].toString()=='text'){
+                        return ChatBubble(text: docs['message'].toString(), isCurrentUser: docs['sender'].toString()==widget.sendruid.toString() ? true:false,time: docs['time'].toString(), );
+                      }
+      
+                         if(docs['type'].toString()=='img'){
+                        return ImgBubble(img: docs['imgurl'].toString(), isCurrentUser: docs['sender'].toString()==widget.sendruid.toString() ? true:false, time: docs['time'].toString());
+                      }
+      
+      
+                     
+                     if(docs['type'].toString()=='video'){
+                        return Videobubble(videourl: docs['videourl'].toString() , isCurrentUser: docs['sender'].toString()==widget.sendruid.toString() ? true:false,time: docs['time'].toString());
+                     }
+                    },
                   );
-                }
-
-                return ListView.builder(
-                  reverse: true,
-                  shrinkWrap: true,
-                  itemCount: snapshot.data!.docs.length,
-                  itemBuilder: (context, index) {
-                    var docs = snapshot.data!.docs[index];
-
-                    if(docs['type'].toString()=='text'){
-                      return ChatBubble(text: docs['message'].toString(), isCurrentUser: docs['sender'].toString()==widget.sendruid.toString() ? true:false,time: docs['time'].toString(), );
-                    }
-
-                       if(docs['type'].toString()=='img'){
-                      return ImgBubble(img: docs['imgurl'].toString(), isCurrentUser: docs['sender'].toString()==widget.sendruid.toString() ? true:false, time: docs['time'].toString());
-                    }
-
-
-                   
-                   if(docs['type'].toString()=='video'){
-                      return Videobubble(videourl: docs['videourl'].toString() , isCurrentUser: docs['sender'].toString()==widget.sendruid.toString() ? true:false,time: docs['time'].toString());
-                   }
-                  },
-                );
-              },
+                },
+              ),
             ),
-          ),
-         
-          Container(
-              margin: EdgeInsets.only(bottom: 5),
-               child: Row(
-                children: [
-                  
-                  Expanded(
-                    child: Material(
-                      
-                      elevation: 40,
-                      borderRadius: BorderRadius.circular(25),
-                      child: Container(    
-                      
-                        padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5), 
-                        child: TextField(
-                          controller: _msg,
-                          style: TextStyle(fontSize: 16),
-                           cursorColor: Color.fromARGB(255, 65, 118, 197) ,
-                           decoration: InputDecoration(
-                            hintText: "Type message here",
-                            //image upload part
-                            prefixIcon: SpeedDial(
-                              
-                              useRotationAnimation: true,
-                              foregroundColor: Colors.white,
-                              backgroundColor:  Color(0xff35bc90),
-                              icon: Icons.attach_file,
-                              activeIcon: Icons.close,
-                             childMargin:  EdgeInsets.all(5),
-                            mini: true,
-                            children: [
-                              SpeedDialChild(child: 
-                              IconButton(icon: Icon(Icons.camera_alt), onPressed: () {
-                                getimage();
-                              },),
-                              ),
-
-                              SpeedDialChild(child: 
-                              IconButton(icon: Icon(Icons.video_camera_back), onPressed: () {
-                                getvideo();
-                              },),
-                              ),
-                            ],
-                           ),
-                            hintStyle: TextStyle(fontSize: 20),
-                            focusColor:  Color.fromARGB(255, 65, 118, 197),
-                           border: InputBorder.none,
+           
+            Container(
+                margin: EdgeInsets.only(bottom: 5),
+                 child: Row(
+                  children: [
+                    
+                    Expanded(
+                      child: Material(
                         
-                           ),
+                        elevation: 40,
+                        borderRadius: BorderRadius.circular(25),
+                        child: Container(    
+                        
+                          padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5), 
+                          child: TextField(
+                            controller: _msg,
+                            style: TextStyle(fontSize: 16),
+                             cursorColor: Color.fromARGB(255, 65, 118, 197) ,
+                             decoration: InputDecoration(
+                              hintText: "Type message here",
+                              //image upload part
+                              suffixIcon: SpeedDial(
+                                
+                                useRotationAnimation: true,
+                                foregroundColor: Colors.white,
+                                backgroundColor:  Color(0xff35bc90),
+                                icon: Icons.attach_file,
+                                activeIcon: Icons.close,
+                               childMargin:  EdgeInsets.all(5),
+                              mini: true,
+                              children: [
+                                SpeedDialChild(child: 
+                                IconButton(icon: Icon(Icons.camera_alt), onPressed: () {
+                                  getimage();
+                                },),
+                                ),
+      
+                                SpeedDialChild(child: 
+                                IconButton(icon: Icon(Icons.video_camera_back), onPressed: () {
+                                  getvideo();
+                                },),
+                                ),
+                              ],
+                             ),
+                              hintStyle: TextStyle(fontSize: 16),
+                              focusColor:  Color.fromARGB(255, 65, 118, 197),
+                             border: InputBorder.none,
+                          
+                             ),
+                          ),
+                          
                         ),
-                        
                       ),
                     ),
-                  ),
-                  SizedBox(width: 5,),
-                  IconButton(
-                        onPressed: () async{
-                            if(_msg.text.isEmpty || _msg==""){
-             
-                            }
-             
-                            if(_msg.text.isNotEmpty){
-                               await  sendmessage(widget.sendruid, widget.recuid, _msg.text,widget.email.toString() ,grpid.toString());
-                                _msg.clear();
-                            }
-                          
-                     
-                        },
-                        icon: Icon(Icons.send,color: Color(0xff35bc90))),
-                ],
-                         ),
-             ),
 
-        ],
+                    IconButton(
+                          onPressed: () async{
+                              if(_msg.text.isEmpty || _msg==""){
+               
+                              }
+               
+                              if(_msg.text.isNotEmpty){
+                                 await  sendmessage(widget.sendruid, widget.recuid, _msg.text,widget.email.toString() ,grpid.toString());
+                                  _msg.clear();
+                              }
+                            
+                       
+                          },
+                          icon: Icon(Icons.send,color: Color(0xff35bc90))),
+                  ],
+                           ),
+               ),
+      
+          ],
+        ),
       ),
     );
   }

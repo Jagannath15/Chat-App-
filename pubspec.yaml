@@ -47,6 +47,7 @@ dependencies:
   chat_bubbles: ^1.4.1
   flutter_speed_dial: ^7.0.0
   appinio_video_player: ^1.2.1
+
  
 
 dev_dependencies:
